@@ -1,0 +1,191 @@
+\documentclass[12pt,a4paper]{article} % 国赛官方要求字号
+
+%---------- 基础宏包 ----------
+\usepackage[UTF8]{ctex}          % 中文支持
+\usepackage{amsmath,amssymb}     % 数学公式
+\usepackage{graphicx}            % 插图支持
+\usepackage{booktabs}            % 专业三线表
+\usepackage{algorithm}           % 算法伪代码
+\usepackage{algpseudocode}       % 算法结构
+\usepackage{hyperref}            % 超链接（自动生成目录）
+\usepackage{array} % 表格增强
+\usepackage[table]{xcolor} % 为了加颜色或加框
+\usepackage{float}
+\usepackage{tcolorbox}
+\usepackage{threeparttable} % 用于表格注释
+\usepackage{diagbox}  % 斜线单元格支持
+\tcbuselibrary{skins}
+\tcbuselibrary{breakable}
+
+% 定义引用环境样式
+\newtcolorbox{markdownquote}{
+  enhanced,
+  breakable,
+  left = 5pt,
+  right = 0pt,
+  top = 0pt,
+  bottom = 0pt,
+  colback = white,
+  colframe = gray!30, % 竖线颜色
+  arc = 0pt,
+  boxrule = 0pt,
+  leftrule = 3pt, % 竖线宽度
+  coltext = gray!70, % 文字颜色
+  fontupper = \normalfont,
+  before skip = 10pt,
+  after skip = 10pt,
+}
+\newcommand{\ps}[1]{%
+    \par\vspace{1em}% 与上文空出一定距离
+    \noindent\textbf{PS:}~#1\par% 以粗体的"PS:"开头，然后接上具体的补充内容
+}
+\renewcommand{\algorithmicrequire}{\textbf{输入:}} 
+\renewcommand{\algorithmicensure}{\textbf{输出:}} 
+
+\begin{document}
+
+\tableofcontents
+\newpage
+
+%以下是笔记内容
+\section{层次分析法\protect[AHP\protect]}
+\begin{markdownquote}
+    画层次结构图，构造判断矩阵，一致性检验，计算权重向量，综合评价。
+\end{markdownquote}
+\subsection{构造层次评价模型}
+分为目标层、准则层和方案层。
+目标层是我们要解决的问题，准则层是评价标准，方案层是备选方案。
+\textbf{需要在论文中给出层次结构图。}
+\begin{figure}[htbp] % 浮动体环境，参数建议位置：here, top, bottom, page
+  \centering % 图片居中
+  \includegraphics[width=0.6\textwidth]{层次结构图.png} % 图片宽度为文本宽度的50%
+  \caption{层次结构图} % 图片标题
+  \label{fig:sample} % 标签，方便引用
+\end{figure}
+\subsection{构造判断矩阵}
+以准则层为例，可以根据重要性进行两两比较，构造判断矩阵。理论上对应的分数需要进行问卷调查判断重要程度，但往往采用自己编或者问AI的方式来给出分数。
+然后记住，以上图为例，则一共会有6个判断矩阵。分别为1个5$\times$5的准则层判断矩阵和5个4$\times$4的方案层判断矩阵。
+\begin{figure}[H] % 浮动体环境，参数建议位置：here, top, bottom, page
+  \centering % 图片居中
+  \includegraphics[width=1\textwidth]{2.png} % 图片宽度为文本宽度的50%
+    \caption{判断矩阵示例} % 图片标题
+  \label{fig:judgment_matrix} % 标签，方便引用
+\end{figure}
+\subsection{一致性检验}
+对以上所有判断矩阵计算一致性指标CI和一致性比率CR。
+\begin{equation}
+CI = \frac{\lambda_{max} - n}{n - 1}
+\end{equation}
+\begin{equation}
+CR = \frac{CI}{RI}
+\end{equation}
+其中，$\lambda_{max}$为判断矩阵的最大特征值，$n$为判断矩阵的阶数，$RI$为随机一致性指标（可以查表）。
+如果CR小于0.1，则判断矩阵一致性通过，否则需要调整判断矩阵。
+RI的值可以通过查表得到，具体如下：
+\begin{table}[H]
+    \centering
+    \begin{threeparttable}
+    \caption{随机一致性指标 RI 表}
+    \begin{tabular}{c|ccccccccccc}
+    \toprule % 顶部粗横线，若不用 booktabs 包，可替换为 \hline
+    $n$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 \\
+    \midrule % 中间横线，若不用 booktabs 包，可替换为 \hline
+    $RI$ & 0 & 0 & 0.58 & 0.90 & 1.12 & 1.24 & 1.32 & 1.41 & 1.45 & 1.49 & 1.51 \\
+    \bottomrule % 底部粗横线，若不用 booktabs 包，可替换为 \hline
+    \end{tabular}
+    \begin{tablenotes}
+            \small % 注释文字使用小字号
+            \item[*] \textcolor{red}{注：需要体现在论文中！！！}
+            \item[] 大于0.1尽量往一致性上靠
+            \item[] 数据来源：Saaty T. L. (1980). The Analytic Hierarchy Process.
+        \end{tablenotes}
+    \end{threeparttable}
+    \label{tab:ri_table}
+\end{table}
+\subsection{计算权重向量}
+计算权重向量的方式有两种：特征值法和算术平均法。
+\subsubsection{特征值法}
+\[
+\boldsymbol{A} = \begin{bmatrix}
+1 & 2 & 5 \\
+1/2 & 1 & 2 \\
+1/5 & 1/2 & 1
+\end{bmatrix}
+\xrightarrow{\text{计算特征值和特征向量}} 
+\lambda_1 = 3.0055,\ \lambda_2 = -0.0028
+\]
+
+\[
+\xrightarrow{\text{一致性检验}} 
+CI = 0.0053 < 0.1,\ \text{通过一致性检验} 
+\xrightarrow{\text{最大特征值对应的特征向量}} 
+\boldsymbol{\alpha} = \begin{pmatrix}
+-0.8902 \\
+-0.4132 \\
+-0.1918
+\end{pmatrix}
+\]
+
+\[
+\xrightarrow{\text{归一化}} 
+\boldsymbol{\omega} = \begin{pmatrix}
+0.5954 \\
+0.2764 \\
+0.1283
+\end{pmatrix} 
+\ 
+\]
+\subsubsection{算术平均法}
+对于判断矩阵
+\[
+\boldsymbol{A} = \begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1n} \\
+a_{21} & a_{22} & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{n1} & a_{n2} & \cdots & a_{nn}
+\end{bmatrix},
+\]
+先将其归一化，再将归一化的矩阵按列相加，并将每个元素除以 \( n \) 得到权重向量，即
+\[
+\omega_i = \frac{1}{n} \sum_{j=1}^{n} \frac{a_{ij}}{\sum_{k=1}^{n} a_{kj}} \quad (i = 1, 2, \cdots, n).
+\]
+\begin{markdownquote}
+    若是标准的一致性矩阵，则不用求平均值，计算单列即可。且按行，按列影响不大。
+\end{markdownquote}
+
+\subsection{层次总排序和一致性检验}
+将各层的权重向量进行综合，得到最终的综合评价结果。
+\begin{equation}
+S = \sum_{i=1}^{n} w_i \cdot x_i
+\end{equation}
+\begin{table}[!ht]
+\centering
+\caption{层次总排序一致性检验结果（所有准则层均为3阶矩阵，RI=0.58）}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+& \textbf{权重} & \textbf{苏杭} & \textbf{北戴河} & \textbf{桂林} & \textbf{$CI$} & \textbf{$CR/\lambda_{\text{max}}$} \\ \hline
+\textbf{景色}   & \cellcolor[HTML]{FDDBC7}0.2910 & \cellcolor[HTML]{FDDBC7}0.5954 & \cellcolor[HTML]{FDDBC7}0.2764 & \cellcolor[HTML]{FDDBC7}0.1283 & \cellcolor[HTML]{FDDBC7}0.0028 & \cellcolor[HTML]{FDDBC7}0.0053/3.0055 \\ \hline
+\textbf{花费}   & \cellcolor[HTML]{FDE9D9}0.5022 & \cellcolor[HTML]{FDE9D9}0.4434 & \cellcolor[HTML]{FDE9D9}0.3874 & \cellcolor[HTML]{FDE9D9}0.1692 & \cellcolor[HTML]{FDE9D9}0.0091 & \cellcolor[HTML]{FDE9D9}0.0176/3.0183 \\ \hline
+\textbf{饮食}   & \cellcolor[HTML]{D9EAD3}0.0648 & \cellcolor[HTML]{D9EAD3}0.5396 & \cellcolor[HTML]{D9EAD3}0.2970 & \cellcolor[HTML]{D9EAD3}0.1634 & \cellcolor[HTML]{D9EAD3}0.0046 & \cellcolor[HTML]{D9EAD3}0.0088/3.0092 \\ \hline
+\textbf{男女比例} & \cellcolor[HTML]{D9D9D9}0.1420 & \cellcolor[HTML]{D9D9D9}0.6267 & \cellcolor[HTML]{D9D9D9}0.2797 & \cellcolor[HTML]{D9D9D9}0.0936 & \cellcolor[HTML]{D9D9D9}0.0429 & \cellcolor[HTML]{D9D9D9}0.0825/3.0858 \\ \hline
+\textbf{最终得分} & \cellcolor[HTML]{FDE9D9}\diagbox[dir=SE,width=8em,height=2em]{}{} & \cellcolor[HTML]{FDE9D9}0.5199 & \cellcolor[HTML]{FDE9D9}0.3339 & \cellcolor[HTML]{FDE9D9}0.1462 & \multicolumn{2}{c|}{\cellcolor[HTML]{FDE9D9}} \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{equation}
+\begin{aligned}
+CR &= \frac{\sum_{i=1}^{4} a_i CI_i}{RI} \\
+   &= \frac{0.2910 \times 0.0028 + 0.5022 \times 0.0091 + 0.0648 \times 0.0046 + 0.1420 \times 0.0429}{0.58} \\
+   &= 0.0203 < 0.1
+\end{aligned}
+\end{equation}
+由于 \( CR < 0.1 \)，层次总排序通过一致性检验，结果可信
+\subsection{范例}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.2\textwidth]{大佬.png}
+    \caption{AHP示例}
+    \label{fig:ahp_example}
+\end{figure}
+
+\end{document}
